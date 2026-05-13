@@ -30,7 +30,7 @@ import java.util.*
 fun CuentasScreen(onNavigateBack: () -> Unit) {
     val application = LocalContext.current.applicationContext as FinanzApplication
     val viewModel: TransaccionViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, application.sessionManager)
     )
     val transacciones by viewModel.transacciones.collectAsState()
     val saldoTotal by viewModel.saldoTotal.collectAsState()

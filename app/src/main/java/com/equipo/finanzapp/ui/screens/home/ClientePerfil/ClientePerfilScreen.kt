@@ -30,21 +30,15 @@ import com.equipo.finanzapp.ui.AppViewModelFactory
 fun ClientePerfilScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSecurity: () -> Unit,
-    onNavigateToMetas: () -> Unit
+    onNavigateToMetas: () -> Unit,
+    onLogout: () -> Unit
 ) {
-    val application = LocalContext.current.applicationContext as FinanzApplication
+    val context = LocalContext.current
+    val application = context.applicationContext as FinanzApplication
     val viewModel: ClientePerfilViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, application.sessionManager)
     )
     val perfil by viewModel.perfil.collectAsState()
-
-    var nombre by remember(perfil) { mutableStateOf(perfil?.nombre ?: "") }
-    var apellido by remember(perfil) { mutableStateOf(perfil?.apellido ?: "") }
-    var email by remember(perfil) { mutableStateOf(perfil?.email ?: "") }
-    var universidad by remember(perfil) { mutableStateOf(perfil?.rfc ?: "") }
-    var telefono by remember(perfil) { mutableStateOf(perfil?.telefono ?: "") }
-
-    var isEditing by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -53,16 +47,6 @@ fun ClientePerfilScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = MaterialTheme.colorScheme.onPrimary)
-                    }
-                },
-                actions = {
-                    TextButton(onClick = {
-                        if (isEditing) {
-                            viewModel.guardarPerfil(nombre, apellido, email, telefono, universidad)
-                        }
-                        isEditing = !isEditing
-                    }) {
-                        Text(if (isEditing) "GUARDAR" else "EDITAR", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -99,21 +83,22 @@ fun ClientePerfilScreen(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = if (nombre.isEmpty()) "Usuario" else "$nombre $apellido",
+                        text = perfil?.let { "${it.nombre} ${it.apellido}" } ?: "Usuario",
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = universidad.ifEmpty { "Estudiante" },
+                        text = perfil?.rfc ?: "Estudiante",
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                         fontSize = 14.sp
                     )
                 }
             }
 
+            // Info Sections
             Column(modifier = Modifier.padding(16.dp)) {
-                ProfileSectionTitle("DATOS PERSONALES")
+                ProfileSectionTitle("DATOS REGISTRADOS")
                 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -122,34 +107,29 @@ fun ClientePerfilScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        if (isEditing) {
-                            OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedTextField(value = apellido, onValueChange = { apellido = it }, label = { Text("Apellido") }, modifier = Modifier.fillMaxWidth())
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Correo") }, modifier = Modifier.fillMaxWidth())
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedTextField(value = universidad, onValueChange = { universidad = it }, label = { Text("Universidad") }, modifier = Modifier.fillMaxWidth())
-                        } else {
-                            InfoRow("Nombre", nombre)
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                            InfoRow("Correo", email)
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                            InfoRow("Universidad", universidad)
-                        }
+                        InfoRow("Nombre", perfil?.nombre ?: "-")
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                        InfoRow("Apellido", perfil?.apellido ?: "-")
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                        InfoRow("Correo Electrónico", perfil?.email ?: "-")
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                        InfoRow("Institución / Universidad", perfil?.rfc ?: "Estudiante")
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                ProfileSectionTitle("OPCIONES")
+                ProfileSectionTitle("CONFIGURACIÓN")
                 ProfileMenuOption("Seguridad y Acceso", Icons.Default.Security, onNavigateToSecurity)
                 ProfileMenuOption("Mis Metas de Ahorro", Icons.Default.Flag, onNavigateToMetas)
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
                 OutlinedButton(
-                    onClick = { /* Implementar Logout */ },
+                    onClick = { 
+                        viewModel.logout()
+                        onLogout()
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFC62828)),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC62828)),
@@ -157,6 +137,7 @@ fun ClientePerfilScreen(
                 ) {
                     Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
                 }
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -166,7 +147,7 @@ fun ClientePerfilScreen(
 fun InfoRow(label: String, value: String) {
     Column {
         Text(label, color = Color.Gray, fontSize = 12.sp)
-        Text(value.ifEmpty { "No especificado" }, color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        Text(value, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -197,7 +178,10 @@ fun ProfileMenuOption(label: String, icon: androidx.compose.ui.graphics.vector.I
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))

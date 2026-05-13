@@ -69,7 +69,12 @@ fun NavGraph(navController: NavHostController) {
             ClientePerfilScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToSecurity = { navController.navigate(Screen.Security.route) },
-                onNavigateToMetas = { navController.navigate(Screen.MetasAhorro.route) }
+                onNavigateToMetas = { navController.navigate(Screen.MetasAhorro.route) },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
             )
         }
         composable(Screen.Security.route) {

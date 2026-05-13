@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.equipo.finanzapp.FinanzApplication
-import com.equipo.finanzapp.data.local.SessionManager
 import com.equipo.finanzapp.ui.AppViewModelFactory
 
 @Composable
@@ -27,11 +26,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     val application = context.applicationContext as FinanzApplication
     val viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, application.sessionManager)
     )
     
     val uiState by viewModel.uiState.collectAsState()
-    val sessionManager = remember { SessionManager(context) }
     
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -43,7 +41,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
             val userEmail = (uiState as AuthUiState.Success).email
-            sessionManager.saveAuthToken("authenticated_session", userEmail)
+            application.sessionManager.saveAuthToken("authenticated_session", userEmail)
             onLoginSuccess()
         }
     }

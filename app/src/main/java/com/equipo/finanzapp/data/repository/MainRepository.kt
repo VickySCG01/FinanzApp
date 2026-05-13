@@ -23,6 +23,9 @@ class MainRepository(
 
     suspend fun login(email: String, password: String): ClienteEntity? = clienteDao.login(email, password)
     suspend fun getClienteByEmail(email: String): ClienteEntity? = clienteDao.getClienteByEmail(email)
+    
+    // Método clave para obtener el perfil en tiempo real
+    fun getClienteByEmailFlow(email: String): Flow<ClienteEntity?> = clienteDao.getClienteByEmailFlow(email)
 
     suspend fun insertCliente(cliente: ClienteEntity) = clienteDao.insert(cliente)
     suspend fun updateCliente(cliente: ClienteEntity) = clienteDao.update(cliente)

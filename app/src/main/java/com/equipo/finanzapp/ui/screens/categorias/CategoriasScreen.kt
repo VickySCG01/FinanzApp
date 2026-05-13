@@ -23,14 +23,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.equipo.finanzapp.FinanzApplication
 import com.equipo.finanzapp.data.local.CategoriaEntity
+import com.equipo.finanzapp.data.local.SessionManager
 import com.equipo.finanzapp.ui.AppViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriasScreen(onNavigateBack: () -> Unit) {
-    val application = LocalContext.current.applicationContext as FinanzApplication
+    val context = LocalContext.current
+    val application = context.applicationContext as FinanzApplication
+    val sessionManager = remember { SessionManager(context) }
     val viewModel: CategoriaViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, sessionManager)
     )
     val uiState by viewModel.categoriasUiState.collectAsState()
     

@@ -28,7 +28,7 @@ import com.equipo.finanzapp.ui.AppViewModelFactory
 fun MetasAhorroScreen(onNavigateBack: () -> Unit) {
     val application = LocalContext.current.applicationContext as FinanzApplication
     val viewModel: MetaAhorroViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, sessionManager = application.sessionManager)
     )
     val metas by viewModel.metas.collectAsState()
     

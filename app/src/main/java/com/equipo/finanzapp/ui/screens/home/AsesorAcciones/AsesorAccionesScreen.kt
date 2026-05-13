@@ -28,7 +28,7 @@ import com.equipo.finanzapp.ui.AppViewModelFactory
 fun AsesorAccionesScreen(onNavigateBack: () -> Unit) {
     val application = LocalContext.current.applicationContext as FinanzApplication
     val viewModel: AsesorAccionesViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, sessionManager = application.sessionManager)
     )
 
     val reuniones by viewModel.reuniones.collectAsState()

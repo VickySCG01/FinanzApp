@@ -45,7 +45,7 @@ fun AsesorPerfilScreen(
 ) {
     val application = LocalContext.current.applicationContext as FinanzApplication
     val viewModel: AsesorPerfilViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, sessionManager = application.sessionManager )
     )
 
     var nombre by remember { mutableStateOf("") }

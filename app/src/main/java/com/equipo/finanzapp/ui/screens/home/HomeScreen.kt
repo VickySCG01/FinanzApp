@@ -36,9 +36,11 @@ fun HomeScreen(
     onNavigateToCuentas: () -> Unit,
     onLogout: () -> Unit
 ) {
-    val application = LocalContext.current.applicationContext as FinanzApplication
+    val context = LocalContext.current
+    val application = context.applicationContext as FinanzApplication
+    val sessionManager = remember { SessionManager(context) }
     val homeViewModel: HomeViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository)
+        factory = AppViewModelFactory(application.repository, sessionManager)
     )
 
     val perfil by homeViewModel.perfil.collectAsState()
@@ -48,8 +50,6 @@ fun HomeScreen(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val sessionManager = remember { SessionManager(context) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -131,6 +131,13 @@ fun HomeScreen(
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = perfil?.let { "¡Hola, ${it.nombre}!" } ?: "¡Hola!",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     BalanceCard(balance, ingresos, gastos)
                 }
                 item {
@@ -187,9 +194,9 @@ fun DrawerHeader(perfil: ClienteEntity?) {
             fontSize = 20.sp
         )
         Text(
-            text = perfil?.rfc ?: "Controlando mis finanzas", 
+            text = perfil?.email ?: "Sin sesión activa", 
             color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), 
-            fontSize = 14.sp
+            fontSize = 13.sp
         )
     }
 }
@@ -215,7 +222,7 @@ fun BalanceCard(balance: Double, ingresos: Double, gastos: Double) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text("BALANCE TOTAL", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text("BALANCE DISPONIBLE", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "$ ${String.format("%.2f", balance)}", 
@@ -278,8 +285,8 @@ fun FinancialTipCard() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Tip del día", color = MaterialTheme.colorScheme.onTertiaryContainer, fontWeight = FontWeight.Bold)
-                Text("Evita los gastos hormiga para ahorrar un 15% más al mes.", color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f), fontSize = 13.sp)
+                Text("Tip estudiantil", color = MaterialTheme.colorScheme.onTertiaryContainer, fontWeight = FontWeight.Bold)
+                Text("Usa tu credencial para descuentos en transporte y museos.", color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f), fontSize = 13.sp)
             }
             Icon(Icons.Default.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
         }

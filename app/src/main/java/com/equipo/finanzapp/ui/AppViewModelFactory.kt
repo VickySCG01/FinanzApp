@@ -2,6 +2,7 @@ package com.equipo.finanzapp.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.equipo.finanzapp.data.local.SessionManager
 import com.equipo.finanzapp.data.repository.MainRepository
 import com.equipo.finanzapp.ui.screens.home.AsesorAcciones.AsesorAccionesViewModel
 import com.equipo.finanzapp.ui.screens.home.AsesorPerfil.AsesorPerfilViewModel
@@ -12,13 +13,16 @@ import com.equipo.finanzapp.ui.screens.cuentas.TransaccionViewModel
 import com.equipo.finanzapp.ui.screens.auth.LoginViewModel
 import com.equipo.finanzapp.ui.screens.metas.MetaAhorroViewModel
 
-class AppViewModelFactory(private val repository: MainRepository) : ViewModelProvider.Factory {
+class AppViewModelFactory(
+    private val repository: MainRepository,
+    private val sessionManager: SessionManager
+) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-            HomeViewModel(repository) as T
+            HomeViewModel(repository, sessionManager) as T
         modelClass.isAssignableFrom(ClientePerfilViewModel::class.java) ->
-            ClientePerfilViewModel(repository) as T
+            ClientePerfilViewModel(repository, sessionManager) as T
         modelClass.isAssignableFrom(AsesorPerfilViewModel::class.java) ->
             AsesorPerfilViewModel(repository) as T
         modelClass.isAssignableFrom(AsesorAccionesViewModel::class.java) ->
