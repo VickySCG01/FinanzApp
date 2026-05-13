@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,9 +24,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.equipo.finanzapp.FinanzApplication
 import com.equipo.finanzapp.data.local.CategoriaEntity
 import com.equipo.finanzapp.ui.AppViewModelFactory
-import com.equipo.finanzapp.ui.theme.BbvaLightBlue
-import com.equipo.finanzapp.ui.theme.BbvaNavy
-import com.equipo.finanzapp.ui.theme.BbvaWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,23 +42,23 @@ fun CategoriasScreen(onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis Presupuestos", fontWeight = FontWeight.Bold) },
+                title = { Text("Categorías y Presupuesto", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = BbvaWhite)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BbvaNavy,
-                    titleContentColor = BbvaWhite
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddCategoryDialog = true },
-                containerColor = BbvaNavy,
-                contentColor = BbvaWhite,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nueva Categoría")
@@ -73,16 +69,16 @@ fun CategoriasScreen(onNavigateBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF4F4F4))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             SummaryHeader(uiState)
 
             Text(
-                "Sugerencias para ti",
+                "Sugerencias de gasto estudiantil",
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = BbvaNavy
+                color = MaterialTheme.colorScheme.primary
             )
             
             LazyRow(
@@ -92,14 +88,14 @@ fun CategoriasScreen(onNavigateBack: () -> Unit) {
             ) {
                 items(sugerencias) { sugerencia ->
                     SuggestionChip(sugerencia) {
-                        viewModel.agregarCategoria(sugerencia, 500.0) // Presupuesto default
+                        viewModel.agregarCategoria(sugerencia, 500.0)
                     }
                 }
             }
 
             if (uiState.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
-                    Text("No tienes presupuestos activos", color = Color.Gray)
+                    Text("No tienes categorías configuradas", color = Color.Gray)
                 }
             } else {
                 LazyColumn(
@@ -146,14 +142,14 @@ fun SuggestionChip(text: String, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = BbvaWhite,
-        border = androidx.compose.foundation.BorderStroke(1.dp, BbvaNavy.copy(alpha = 0.2f))
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 12.sp,
-            color = BbvaNavy
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -165,24 +161,25 @@ fun SummaryHeader(uiState: List<CategoriaUiState>) {
     
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BbvaWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(8.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("TU LÍMITE MENSUAL", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            Text("$ ${String.format("%.2f", totalPresupuesto)}", color = BbvaNavy, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text("PRESUPUESTO TOTAL", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text("$ ${String.format("%.2f", totalPresupuesto)}", color = MaterialTheme.colorScheme.primary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
                 progress = { if (totalPresupuesto > 0) (totalGasto / totalPresupuesto).toFloat() else 0f },
-                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
-                color = if (totalGasto > totalPresupuesto) Color.Red else BbvaLightBlue,
-                trackColor = Color(0xFFE0E0E0)
+                modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)),
+                color = if (totalGasto > totalPresupuesto) Color.Red else MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Gastado: $ ${String.format("%.2f", totalGasto)}", color = Color.Gray, fontSize = 12.sp)
-                Text("Disponible: $ ${String.format("%.2f", (totalPresupuesto - totalGasto).coerceAtLeast(0.0))}", color = BbvaNavy, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text("Usado: $ ${String.format("%.2f", totalGasto)}", color = Color.Gray, fontSize = 12.sp)
+                val disponible = (totalPresupuesto - totalGasto).coerceAtLeast(0.0)
+                Text("Disponible: $ ${String.format("%.2f", disponible)}", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -194,30 +191,30 @@ fun CategoriaProgressCard(state: CategoriaUiState, onDelete: () -> Unit, onAddEx
     val color = when {
         progress >= 1.0f -> Color.Red
         progress >= 0.8f -> Color(0xFFFFA000)
-        else -> BbvaLightBlue
+        else -> MaterialTheme.colorScheme.primary
     }
 
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onAddExpense() },
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier.size(36.dp).clip(CircleShape).background(color.copy(alpha = 0.1f)),
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Category, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Label, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(state.categoria.nombre, fontWeight = FontWeight.Bold, color = BbvaNavy, fontSize = 16.sp)
+                    Text(state.categoria.nombre, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
                     Text("Límite: $${state.categoria.presupuesto}", color = Color.Gray, fontSize = 12.sp)
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.LightGray)
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.DeleteOutline, contentDescription = "Eliminar", tint = Color.Gray)
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -228,9 +225,9 @@ fun CategoriaProgressCard(state: CategoriaUiState, onDelete: () -> Unit, onAddEx
             Spacer(modifier = Modifier.height(6.dp))
             LinearProgressIndicator(
                 progress = { progress.coerceAtMost(1f) },
-                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                 color = color,
-                trackColor = Color(0xFFEEEEEE)
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }
@@ -243,32 +240,34 @@ fun AddCategoriaDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Uni
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Configurar Presupuesto", color = BbvaNavy, fontWeight = FontWeight.Bold) },
+        title = { Text("Nueva Categoría", fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it },
-                    label = { Text("Nombre de categoría") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = presupuesto,
                     onValueChange = { presupuesto = it },
-                    label = { Text("Monto máximo mensual") },
+                    label = { Text("Presupuesto Mensual") },
                     modifier = Modifier.fillMaxWidth(),
-                    prefix = { Text("$") }
+                    prefix = { Text("$") },
+                    shape = RoundedCornerShape(12.dp)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(nombre, presupuesto) }, colors = ButtonDefaults.buttonColors(containerColor = BbvaNavy)) {
-                Text("Crear")
+            Button(onClick = { onConfirm(nombre, presupuesto) }) {
+                Text("Añadir")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar", color = BbvaNavy) }
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
@@ -280,32 +279,34 @@ fun AddExpenseDialog(categoria: CategoriaEntity, onDismiss: () -> Unit, onConfir
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Registrar Gasto: ${categoria.nombre}", color = BbvaNavy, fontWeight = FontWeight.Bold) },
+        title = { Text("Gasto en ${categoria.nombre}", fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 OutlinedTextField(
                     value = monto,
                     onValueChange = { monto = it },
-                    label = { Text("Monto del gasto") },
+                    label = { Text("Monto") },
                     modifier = Modifier.fillMaxWidth(),
-                    prefix = { Text("$") }
+                    prefix = { Text("$") },
+                    shape = RoundedCornerShape(12.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = descripcion,
                     onValueChange = { descripcion = it },
-                    label = { Text("Descripción (opcional)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Nota (ej. Fotocopias)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(monto, descripcion) }, colors = ButtonDefaults.buttonColors(containerColor = BbvaNavy)) {
-                Text("Confirmar Gasto")
+            Button(onClick = { onConfirm(monto, descripcion) }) {
+                Text("Registrar")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar", color = BbvaNavy) }
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

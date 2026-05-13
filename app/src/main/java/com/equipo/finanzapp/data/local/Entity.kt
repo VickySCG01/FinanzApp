@@ -11,7 +11,8 @@ data class ClienteEntity(
     val apellido: String,
     val email: String,
     val telefono: String,
-    val rfc: String,
+    val rfc: String, // Usado como Universidad en el contexto estudiantil
+    val password: String = "12345", // Password por defecto para simplificar
     val saldo: Double = 0.0
 )
 
@@ -68,4 +69,15 @@ data class TransaccionEntity(
     val descripcion: String,
     val fecha: Long, // Timestamp
     val tipo: String // "INGRESO" o "EGRESO"
+)
+
+@Entity(tableName = "metas_ahorro")
+data class MetaAhorroEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val nombre: String,
+    val montoObjetivo: Double,
+    val montoActual: Double = 0.0,
+    val fechaLimite: String,
+    val icono: String = "flag"
 )

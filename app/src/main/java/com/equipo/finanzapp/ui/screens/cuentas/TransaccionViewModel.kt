@@ -26,7 +26,7 @@ class TransaccionViewModel(private val repository: MainRepository) : ViewModel()
         initialValue = 0.0
     )
 
-    fun agregarIngreso(monto: Double, descripcion: String) {
+    fun agregarTransaccion(monto: Double, descripcion: String, esIngreso: Boolean) {
         if (monto <= 0) return
         viewModelScope.launch {
             repository.insertTransaccion(
@@ -35,7 +35,7 @@ class TransaccionViewModel(private val repository: MainRepository) : ViewModel()
                     monto = monto,
                     descripcion = descripcion,
                     fecha = System.currentTimeMillis(),
-                    tipo = "INGRESO"
+                    tipo = if (esIngreso) "INGRESO" else "EGRESO"
                 )
             )
         }

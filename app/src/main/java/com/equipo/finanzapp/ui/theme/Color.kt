@@ -2,18 +2,19 @@ package com.equipo.finanzapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// BBVA Style Palette
-val BbvaNavy = Color(0xFF004481)
-val BbvaLightBlue = Color(0xFF1973B8)
-val BbvaMediumBlue = Color(0xFF043263)
-val BbvaWhite = Color(0xFFFFFFFF)
-val BbvaGrey = Color(0xFFF4F4F4)
-val BbvaDarkGrey = Color(0xFF707070)
+// FinanzApp Modern Palette
+val PrimaryGreen = Color(0xFF2E7D32) // Forest Green
+val SecondaryGreen = Color(0xFF4CAF50) // Material Green
+val BackgroundLight = Color(0xFFF5F7FA)
+val TextDark = Color(0xFF263238)
+val AccentOrange = Color(0xFFFF9800)
+val SoftGrey = Color(0xFFECEFF1)
 
-val Navy80 = BbvaNavy
-val NavyGrey80 = Color(0xFFD2E3F2)
-val LightBlue80 = BbvaLightBlue
+// Theme Colors
+val Green80 = Color(0xFF81C784)
+val GreenGrey80 = Color(0xFFA5D6A7)
+val Lime80 = Color(0xFFDCE775)
 
-val Navy40 = BbvaMediumBlue
-val NavyGrey40 = BbvaDarkGrey
-val LightBlue40 = Color(0xFF004481)
+val Green40 = Color(0xFF2E7D32)
+val GreenGrey40 = Color(0xFF455A64)
+val Lime40 = Color(0xFF827717)

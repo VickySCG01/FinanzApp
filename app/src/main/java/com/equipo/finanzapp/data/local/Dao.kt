@@ -12,14 +12,42 @@ import kotlinx.coroutines.flow.Flow
 interface ClienteDao {
     @Query("SELECT * FROM clientes")
     fun getAllClientes(): Flow<List<ClienteEntity>>
+    
     @Query("SELECT * FROM clientes WHERE id = :id")
     fun getClienteById(id: Int): Flow<ClienteEntity>
+    
+    @Query("SELECT * FROM clientes WHERE email = :email AND password = :password LIMIT 1")
+    suspend fun login(email: String, password: String): ClienteEntity?
+
+    @Query("SELECT * FROM clientes WHERE email = :email LIMIT 1")
+    suspend fun getClienteByEmail(email: String): ClienteEntity?
+
+    @Query("SELECT * FROM clientes WHERE email = :email LIMIT 1")
+    fun getClienteByEmailFlow(email: String): Flow<ClienteEntity?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(cliente: ClienteEntity)
+    
     @Update
     suspend fun update(cliente: ClienteEntity)
+    
     @Delete
     suspend fun delete(cliente: ClienteEntity)
+}
+
+@Dao
+interface MetaAhorroDao {
+    @Query("SELECT * FROM metas_ahorro")
+    fun getAllMetas(): Flow<List<MetaAhorroEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(meta: MetaAhorroEntity)
+
+    @Update
+    suspend fun update(meta: MetaAhorroEntity)
+
+    @Delete
+    suspend fun delete(meta: MetaAhorroEntity)
 }
 
 @Dao
@@ -82,8 +110,8 @@ interface TransaccionDao {
     @Query("SELECT * FROM transacciones WHERE categoriaId = :catId ORDER BY fecha DESC")
     fun getTransaccionesByCategoria(catId: Int): Flow<List<TransaccionEntity>>
 
-    @Query("SELECT SUM(monto) FROM transacciones WHERE categoriaId = :catId AND tipo = 'EGRESO'")
-    fun getGastoTotalPorCategoria(catId: Int): Flow<Double?>
+    @Query("SELECT COALESCE(SUM(monto), 0.0) FROM transacciones WHERE categoriaId = :catId AND tipo = 'EGRESO'")
+    fun getGastoTotalPorCategoria(catId: Int): Flow<Double>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transaccion: TransaccionEntity)

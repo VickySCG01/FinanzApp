@@ -11,6 +11,8 @@ import com.equipo.finanzapp.ui.screens.home.ClientePerfil.ClientePerfilScreen
 import com.equipo.finanzapp.ui.screens.home.HomeScreen
 import com.equipo.finanzapp.ui.screens.categorias.CategoriasScreen
 import com.equipo.finanzapp.ui.screens.cuentas.CuentasScreen
+import com.equipo.finanzapp.ui.screens.metas.MetasAhorroScreen
+import com.equipo.finanzapp.ui.screens.security.SecurityScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -20,6 +22,8 @@ sealed class Screen(val route: String) {
     object AsesorAcciones : Screen("asesor_acciones")
     object Categorias : Screen("categorias")
     object Cuentas : Screen("cuentas")
+    object MetasAhorro : Screen("metas_ahorro")
+    object Security : Screen("security")
 }
 
 @Composable
@@ -63,8 +67,16 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.ClientePerfil.route) {
             ClientePerfilScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSecurity = { navController.navigate(Screen.Security.route) },
+                onNavigateToMetas = { navController.navigate(Screen.MetasAhorro.route) }
             )
+        }
+        composable(Screen.Security.route) {
+            SecurityScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(Screen.MetasAhorro.route) {
+            MetasAhorroScreen(onNavigateBack = { navController.popBackStack() })
         }
         composable(Screen.AsesorPerfil.route) {
             AsesorPerfilScreen(

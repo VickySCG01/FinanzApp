@@ -12,9 +12,10 @@ import androidx.room.RoomDatabase
         ReunionEntity::class,
         AvisoEntity::class,
         CategoriaEntity::class,
-        TransaccionEntity::class
+        TransaccionEntity::class,
+        MetaAhorroEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -25,6 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun avisoDao(): AvisoDao
     abstract fun categoriaDao(): CategoriaDao
     abstract fun transaccionDao(): TransaccionDao
+    abstract fun metaAhorroDao(): MetaAhorroDao
 
     companion object {
         @Volatile

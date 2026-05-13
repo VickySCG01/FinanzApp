@@ -19,10 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.equipo.finanzapp.FinanzApplication
+import com.equipo.finanzapp.data.local.ClienteEntity
 import com.equipo.finanzapp.data.local.SessionManager
-import com.equipo.finanzapp.ui.theme.BbvaLightBlue
-import com.equipo.finanzapp.ui.theme.BbvaNavy
-import com.equipo.finanzapp.ui.theme.BbvaWhite
+import com.equipo.finanzapp.ui.AppViewModelFactory
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,16 @@ fun HomeScreen(
     onNavigateToCuentas: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val application = LocalContext.current.applicationContext as FinanzApplication
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = AppViewModelFactory(application.repository)
+    )
+
+    val perfil by homeViewModel.perfil.collectAsState()
+    val balance by homeViewModel.balance.collectAsState()
+    val ingresos by homeViewModel.ingresosTotales.collectAsState()
+    val gastos by homeViewModel.gastosTotales.collectAsState()
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -44,42 +55,44 @@ fun HomeScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = BbvaNavy,
-                drawerContentColor = Color.White,
+                drawerContainerColor = MaterialTheme.colorScheme.primary,
+                drawerContentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.width(300.dp)
             ) {
-                DrawerHeader()
+                DrawerHeader(perfil)
                 Spacer(modifier = Modifier.height(8.dp))
                 NavigationDrawerItem(
-                    label = { Text("Inicio", color = Color.White) },
+                    label = { Text("Resumen", color = MaterialTheme.colorScheme.onPrimary) },
                     selected = true,
                     onClick = { scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Default.Home, contentDescription = null, tint = Color.White) },
-                    colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent, selectedContainerColor = BbvaLightBlue.copy(alpha = 0.2f)),
+                    icon = { Icon(Icons.Default.Dashboard, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary) },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent, 
+                        selectedContainerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                    ),
                     shape = RoundedCornerShape(0.dp)
                 )
-                DrawerMenuItem("Categorías", Icons.Default.Category) {
+                DrawerMenuItem("Mis Movimientos", Icons.Default.ReceiptLong) {
+                    scope.launch { drawerState.close() }
+                    onNavigateToCuentas()
+                }
+                DrawerMenuItem("Presupuesto por Categorías", Icons.Default.Category) {
                     scope.launch { drawerState.close() }
                     onNavigateToCategorias()
+                }
+                DrawerMenuItem("Asesoría Estudiantil", Icons.Default.SupportAgent) {
+                    scope.launch { drawerState.close() }
+                    onNavigateToAsesorAcciones()
                 }
                 DrawerMenuItem("Mi Perfil", Icons.Default.Person) {
                     scope.launch { drawerState.close() }
                     onNavigateToClientePerfil()
                 }
-                DrawerMenuItem("Asesoría", Icons.Default.SupportAgent) {
-                    scope.launch { drawerState.close() }
-                    onNavigateToAsesorAcciones()
-                }
-                DrawerMenuItem("Cuentas", Icons.Default.AccountBalanceWallet) {
-                    scope.launch { drawerState.close() }
-                    onNavigateToCuentas()
-                }
-                DrawerMenuItem("Préstamos", Icons.Default.School) { /* TODO */ }
                 
                 Spacer(modifier = Modifier.weight(1f))
                 
-                Divider(color = Color.White.copy(alpha = 0.2f))
-                DrawerMenuItem("Cerrar Sesión", Icons.Default.ExitToApp) {
+                Divider(color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
+                DrawerMenuItem("Cerrar Sesión", Icons.Default.Logout) {
                     scope.launch { drawerState.close() }
                     sessionManager.clearAuthToken()
                     onLogout()
@@ -93,28 +106,22 @@ fun HomeScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            "Hola, Estudiante",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = BbvaWhite
+                            "FinanzApp",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = BbvaWhite)
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { /* Notifications */ }) {
-                            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = BbvaWhite)
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = BbvaNavy
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 )
-            },
-            containerColor = Color(0xFFF4F4F4)
+            }
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
@@ -124,15 +131,15 @@ fun HomeScreen(
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    MainAccountCard()
+                    BalanceCard(balance, ingresos, gastos)
                 }
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Accesos directos",
+                        text = "Acciones Rápidas",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = BbvaNavy
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -141,15 +148,15 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        ShortcutItem("Transferir", Icons.Default.SwapHoriz)
-                        ShortcutItem("Categorías", Icons.Default.Category) { onNavigateToCategorias() }
-                        ShortcutItem("Retiro sin tarjeta", Icons.Default.Atm)
-                        ShortcutItem("Más", Icons.Default.Add)
+                        ShortcutItem("Nuevo Movimiento", Icons.Default.AddCircleOutline) { onNavigateToCuentas() }
+                        ShortcutItem("Presupuesto", Icons.Default.PieChart) { onNavigateToCategorias() }
+                        ShortcutItem("Mi Perfil", Icons.Default.AccountCircle) { onNavigateToClientePerfil() }
+                        ShortcutItem("Asesor", Icons.Default.QuestionAnswer) { onNavigateToAsesorAcciones() }
                     }
                 }
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
-                    PromotionCard()
+                    FinancialTipCard()
                 }
             }
         }
@@ -157,7 +164,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun DrawerHeader() {
+fun DrawerHeader(perfil: ClienteEntity?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,86 +174,114 @@ fun DrawerHeader() {
             modifier = Modifier
                 .size(64.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.2f)),
+                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
+            Icon(Icons.Default.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(48.dp))
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Juan Pérez", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text("Ver mi perfil", color = BbvaLightBlue, fontSize = 14.sp)
+        Text(
+            text = if (perfil != null) "${perfil.nombre} ${perfil.apellido}" else "Usuario Estudiante", 
+            color = MaterialTheme.colorScheme.onPrimary, 
+            fontWeight = FontWeight.Bold, 
+            fontSize = 20.sp
+        )
+        Text(
+            text = perfil?.rfc ?: "Controlando mis finanzas", 
+            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), 
+            fontSize = 14.sp
+        )
     }
 }
 
 @Composable
 fun DrawerMenuItem(label: String, icon: ImageVector, onClick: () -> Unit) {
     NavigationDrawerItem(
-        label = { Text(label, color = Color.White) },
+        label = { Text(label, color = MaterialTheme.colorScheme.onPrimary) },
         selected = false,
         onClick = onClick,
-        icon = { Icon(icon, contentDescription = null, tint = Color.White) },
+        icon = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary) },
         colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent),
         shape = RoundedCornerShape(0.dp)
     )
 }
 
 @Composable
-fun MainAccountCard() {
+fun BalanceCard(balance: Double, ingresos: Double, gastos: Double) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("CUENTAS EN PESOS", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = BbvaNavy)
-            }
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text("BALANCE TOTAL", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("001ah9234", color = BbvaNavy, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("$ 12,450.00", color = BbvaNavy, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text("Saldo disponible", color = Color.Gray, fontSize = 12.sp)
+            Text(
+                text = "$ ${String.format("%.2f", balance)}", 
+                color = if (balance >= 0) MaterialTheme.colorScheme.primary else Color(0xFFC62828), 
+                fontSize = 32.sp, 
+                fontWeight = FontWeight.ExtraBold
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text("Ingresos", fontSize = 12.sp, color = Color.Gray)
+                    Text("$ ${String.format("%.2f", ingresos)}", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("Gastos", fontSize = 12.sp, color = Color.Gray)
+                    Text("$ ${String.format("%.2f", gastos)}", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
+                }
+            }
         }
     }
 }
 
 @Composable
 fun ShortcutItem(label: String, icon: ImageVector, onClick: () -> Unit = {}) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(80.dp)) {
         Box(
             modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(Color.White)
+                .size(60.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
                 .clickable { onClick() },
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = BbvaNavy)
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(label, fontSize = 12.sp, color = BbvaNavy)
+        Text(
+            text = label, 
+            fontSize = 11.sp, 
+            fontWeight = FontWeight.Medium, 
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1
+        )
     }
 }
 
 @Composable
-fun PromotionCard() {
+fun FinancialTipCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = BbvaNavy),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("¿Necesitas apoyo para tu colegiatura?", color = Color.White, fontWeight = FontWeight.Bold)
-                Text("Conoce nuestros préstamos estudiantiles con tasa preferencial.", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+                Text("Tip del día", color = MaterialTheme.colorScheme.onTertiaryContainer, fontWeight = FontWeight.Bold)
+                Text("Evita los gastos hormiga para ahorrar un 15% más al mes.", color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f), fontSize = 13.sp)
             }
-            Icon(Icons.Default.School, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
+            Icon(Icons.Default.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
         }
     }
 }

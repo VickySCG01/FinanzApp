@@ -22,9 +22,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.equipo.finanzapp.FinanzApplication
 import com.equipo.finanzapp.data.local.ReunionEntity
 import com.equipo.finanzapp.ui.AppViewModelFactory
-import com.equipo.finanzapp.ui.theme.BbvaLightBlue
-import com.equipo.finanzapp.ui.theme.BbvaNavy
-import com.equipo.finanzapp.ui.theme.BbvaWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,26 +37,26 @@ fun AsesorAccionesScreen(onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Asesoría Financiera", fontWeight = FontWeight.Bold) },
+                title = { Text("Asesoría Estudiantil", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = BbvaWhite)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BbvaNavy,
-                    titleContentColor = BbvaWhite
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showBookingDialog = true },
-                containerColor = BbvaNavy,
-                contentColor = BbvaWhite,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Nueva Cita") },
-                shape = RoundedCornerShape(24.dp)
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                icon = { Icon(Icons.Default.Event, contentDescription = null) },
+                text = { Text("Agendar Cita") },
+                shape = RoundedCornerShape(16.dp)
             )
         }
     ) { paddingValues ->
@@ -67,22 +64,25 @@ fun AsesorAccionesScreen(onNavigateBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF4F4F4))
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            // Sección de Asesor Asignado
             AsesorAsignadoCard()
 
             Text(
-                "Tus próximas citas",
+                "Tus próximas sesiones",
                 modifier = Modifier.padding(16.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = BbvaNavy
+                color = MaterialTheme.colorScheme.primary
             )
 
             if (reuniones.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
-                    Text("No tienes citas programadas", color = Color.Gray)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(64.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No tienes asesorías programadas", color = Color.Gray)
+                    }
                 }
             } else {
                 LazyColumn(
@@ -101,7 +101,7 @@ fun AsesorAccionesScreen(onNavigateBack: () -> Unit) {
             BookingDialog(
                 onDismiss = { showBookingDialog = false },
                 onConfirm = { fecha, motivo ->
-                    viewModel.guardarReunion(fecha, "10:00 AM", motivo, "")
+                    viewModel.guardarReunion(fecha, "11:00 AM", motivo, "")
                     showBookingDialog = false
                 }
             )
@@ -113,21 +113,26 @@ fun AsesorAccionesScreen(onNavigateBack: () -> Unit) {
 fun AsesorAsignadoCard() {
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BbvaWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(48.dp).clip(CircleShape).background(BbvaLightBlue.copy(alpha = 0.1f)),
+                modifier = Modifier.size(52.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.SupportAgent, tint = BbvaNavy, contentDescription = null)
+                Icon(Icons.Default.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = null)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text("Lic. Roberto Sánchez", fontWeight = FontWeight.Bold, color = BbvaNavy)
-                Text("Asesor de Becas y Créditos", color = Color.Gray, fontSize = 12.sp)
-                Text("En línea ahora", color = Color(0xFF2E7D32), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Lic. Roberto Sánchez", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Especialista en Finanzas Educativas", color = Color.Gray, fontSize = 12.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2E7D32)))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Disponible para consulta", color = Color(0xFF2E7D32), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                }
             }
         }
     }
@@ -137,18 +142,22 @@ fun AsesorAsignadoCard() {
 fun ReunionItem(reunion: ReunionEntity) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(reunion.fecha.take(2), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = BbvaNavy)
-                Text("MAY", fontSize = 10.sp, color = Color.Gray)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp)).padding(8.dp)
+            ) {
+                Text(reunion.fecha.take(2), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("MES", fontSize = 10.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(reunion.motivo, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text("${reunion.hora} • Videollamada", color = Color.Gray, fontSize = 12.sp)
+                Text(reunion.motivo, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text("${reunion.hora} • Videollamada de orientación", color = Color.Gray, fontSize = 12.sp)
             }
             Icon(Icons.Default.ChevronRight, tint = Color.LightGray, contentDescription = null)
         }
@@ -162,31 +171,33 @@ fun BookingDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Programar Asesoría", color = BbvaNavy, fontWeight = FontWeight.Bold) },
+        title = { Text("Programar Orientación", fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 OutlinedTextField(
                     value = fecha,
                     onValueChange = { fecha = it },
-                    label = { Text("Fecha (ej. 24 de Mayo)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Fecha deseada") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = motivo,
                     onValueChange = { motivo = it },
-                    label = { Text("Motivo (Beca, Préstamo, etc.)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Asunto (Beca, Presupuesto, etc.)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(fecha, motivo) }, colors = ButtonDefaults.buttonColors(containerColor = BbvaNavy)) {
+            Button(onClick = { onConfirm(fecha, motivo) }) {
                 Text("Agendar")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar", color = BbvaNavy) }
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

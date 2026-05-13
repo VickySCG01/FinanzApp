@@ -13,7 +13,8 @@ class FinanzApplication : Application() {
             database.reunionDao(),
             database.avisoDao(),
             database.categoriaDao(),
-            database.transaccionDao()
+            database.transaccionDao(),
+            database.metaAhorroDao()
         )
     }
 }

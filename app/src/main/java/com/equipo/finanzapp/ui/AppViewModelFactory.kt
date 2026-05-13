@@ -9,6 +9,8 @@ import com.equipo.finanzapp.ui.screens.home.ClientePerfil.ClientePerfilViewModel
 import com.equipo.finanzapp.ui.screens.home.HomeViewModel
 import com.equipo.finanzapp.ui.screens.categorias.CategoriaViewModel
 import com.equipo.finanzapp.ui.screens.cuentas.TransaccionViewModel
+import com.equipo.finanzapp.ui.screens.auth.LoginViewModel
+import com.equipo.finanzapp.ui.screens.metas.MetaAhorroViewModel
 
 class AppViewModelFactory(private val repository: MainRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
@@ -25,6 +27,10 @@ class AppViewModelFactory(private val repository: MainRepository) : ViewModelPro
             CategoriaViewModel(repository) as T
         modelClass.isAssignableFrom(TransaccionViewModel::class.java) ->
             TransaccionViewModel(repository) as T
+        modelClass.isAssignableFrom(LoginViewModel::class.java) ->
+            LoginViewModel(repository) as T
+        modelClass.isAssignableFrom(MetaAhorroViewModel::class.java) ->
+            MetaAhorroViewModel(repository) as T
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }
 }

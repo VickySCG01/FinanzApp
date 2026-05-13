@@ -22,9 +22,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.equipo.finanzapp.FinanzApplication
 import com.equipo.finanzapp.data.local.TransaccionEntity
 import com.equipo.finanzapp.ui.AppViewModelFactory
-import com.equipo.finanzapp.ui.theme.BbvaLightBlue
-import com.equipo.finanzapp.ui.theme.BbvaNavy
-import com.equipo.finanzapp.ui.theme.BbvaWhite
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,31 +35,31 @@ fun CuentasScreen(onNavigateBack: () -> Unit) {
     val transacciones by viewModel.transacciones.collectAsState()
     val saldoTotal by viewModel.saldoTotal.collectAsState()
     
-    var showAddIncomeDialog by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Cuenta", fontWeight = FontWeight.Bold) },
+                title = { Text("Movimientos", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = BbvaWhite)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BbvaNavy,
-                    titleContentColor = BbvaWhite
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddIncomeDialog = true },
-                containerColor = BbvaNavy,
-                contentColor = BbvaWhite,
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Ingreso")
+                Icon(Icons.Default.Add, contentDescription = "Nueva Transacción")
             }
         }
     ) { paddingValues ->
@@ -70,28 +67,30 @@ fun CuentasScreen(onNavigateBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF4F4F4))
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            // Balance Card
             BalanceHeader(saldoTotal)
 
             Text(
-                "Movimientos recientes",
-                modifier = Modifier.padding(16.dp),
+                "Historial Reciente",
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = BbvaNavy
+                color = MaterialTheme.colorScheme.primary
             )
 
             if (transacciones.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No hay movimientos registrados", color = Color.Gray)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(64.dp))
+                        Text("Sin movimientos aún", color = Color.Gray)
+                    }
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(transacciones) { transaccion ->
                         TransaccionItem(transaccion)
@@ -100,12 +99,12 @@ fun CuentasScreen(onNavigateBack: () -> Unit) {
             }
         }
 
-        if (showAddIncomeDialog) {
-            AddIncomeDialog(
-                onDismiss = { showAddIncomeDialog = false },
-                onConfirm = { monto, desc ->
-                    viewModel.agregarIngreso(monto.toDoubleOrNull() ?: 0.0, desc)
-                    showAddIncomeDialog = false
+        if (showAddDialog) {
+            AddTransactionDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { monto, desc, esIngreso ->
+                    viewModel.agregarTransaccion(monto.toDoubleOrNull() ?: 0.0, desc, esIngreso)
+                    showAddDialog = false
                 }
             )
         }
@@ -118,36 +117,22 @@ fun BalanceHeader(saldo: Double) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BbvaWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(8.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("SALDO TOTAL DISPONIBLE", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text("BALANCE DISPONIBLE", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "$ ${String.format("%.2f", saldo)}",
-                color = BbvaNavy,
+                color = if (saldo >= 0) MaterialTheme.colorScheme.primary else Color(0xFFC62828),
                 fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.TrendingUp, contentDescription = null, tint = Color(0xFF2E7D32))
-                    Text("Ingresos", fontSize = 10.sp, color = Color.Gray)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.TrendingDown, contentDescription = null, tint = Color.Red)
-                    Text("Gastos", fontSize = 10.sp, color = Color.Gray)
-                }
-            }
         }
     }
 }
@@ -155,33 +140,36 @@ fun BalanceHeader(saldo: Double) {
 @Composable
 fun TransaccionItem(transaccion: TransaccionEntity) {
     val isIngreso = transaccion.tipo == "INGRESO"
-    val color = if (isIngreso) Color(0xFF2E7D32) else BbvaNavy
-    val icon = if (isIngreso) Icons.Default.ArrowCircleUp else Icons.Default.ArrowCircleDown
-    val dateFormat = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
+    val icon = if (isIngreso) Icons.Default.AddCircleOutline else Icons.Default.RemoveCircleOutline
+    val color = if (isIngreso) Color(0xFF2E7D32) else Color(0xFFC62828)
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = if (isIngreso) Color(0xFF2E7D32) else Color.Red.copy(alpha = 0.7f),
-                modifier = Modifier.size(32.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = color)
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaccion.descripcion.ifBlank { if (isIngreso) "Ingreso" else "Gasto" },
                     fontWeight = FontWeight.Bold,
-                    color = BbvaNavy,
-                    fontSize = 14.sp
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 15.sp
                 )
                 Text(
                     text = dateFormat.format(Date(transaccion.fecha)),
@@ -192,46 +180,68 @@ fun TransaccionItem(transaccion: TransaccionEntity) {
             Text(
                 text = "${if (isIngreso) "+" else "-"} $ ${String.format("%.2f", transaccion.monto)}",
                 fontWeight = FontWeight.Bold,
-                color = if (isIngreso) Color(0xFF2E7D32) else Color.Black,
-                fontSize = 14.sp
+                color = color,
+                fontSize = 16.sp
             )
         }
     }
 }
 
 @Composable
-fun AddIncomeDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
+fun AddTransactionDialog(onDismiss: () -> Unit, onConfirm: (String, String, Boolean) -> Unit) {
     var monto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
+    var esIngreso by remember { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Registrar Ingreso", color = BbvaNavy, fontWeight = FontWeight.Bold) },
+        title = { Text("Nueva Transacción", fontWeight = FontWeight.Bold) },
         text = {
             Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    FilterChip(
+                        selected = esIngreso,
+                        onClick = { esIngreso = true },
+                        label = { Text("Ingreso") },
+                        leadingIcon = if (esIngreso) { { Icon(Icons.Default.Check, contentDescription = null) } } else null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    FilterChip(
+                        selected = !esIngreso,
+                        onClick = { esIngreso = false },
+                        label = { Text("Gasto") },
+                        leadingIcon = if (!esIngreso) { { Icon(Icons.Default.Check, contentDescription = null) } } else null
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = monto,
                     onValueChange = { monto = it },
                     label = { Text("Monto") },
                     modifier = Modifier.fillMaxWidth(),
-                    prefix = { Text("$") }
+                    prefix = { Text("$") },
+                    shape = RoundedCornerShape(12.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = descripcion,
                     onValueChange = { descripcion = it },
-                    label = { Text("Concepto (ej. Depósito, Beca)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Descripción") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(monto, descripcion) }, colors = ButtonDefaults.buttonColors(containerColor = BbvaNavy)) {
-                Text("Cargar saldo")
+            Button(onClick = { onConfirm(monto, descripcion, esIngreso) }) {
+                Text("Registrar")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar", color = BbvaNavy) }
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
