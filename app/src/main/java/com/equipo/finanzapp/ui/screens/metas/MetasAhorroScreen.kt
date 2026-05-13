@@ -26,9 +26,10 @@ import com.equipo.finanzapp.ui.AppViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MetasAhorroScreen(onNavigateBack: () -> Unit) {
-    val application = LocalContext.current.applicationContext as FinanzApplication
+    val context = LocalContext.current
+    val application = context.applicationContext as FinanzApplication
     val viewModel: MetaAhorroViewModel = viewModel(
-        factory = AppViewModelFactory(application.repository, sessionManager = application.sessionManager)
+        factory = AppViewModelFactory(application.repository, application.sessionManager)
     )
     val metas by viewModel.metas.collectAsState()
     

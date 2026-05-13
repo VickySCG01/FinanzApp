@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,16 +17,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.equipo.finanzapp.FinanzApplication
 import com.equipo.finanzapp.data.local.ClienteEntity
 import com.equipo.finanzapp.data.local.SessionManager
 import com.equipo.finanzapp.ui.AppViewModelFactory
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +77,7 @@ fun HomeScreen(
                     ),
                     shape = RoundedCornerShape(0.dp)
                 )
-                DrawerMenuItem("Mis Movimientos", Icons.Default.ReceiptLong) {
+                DrawerMenuItem("Mis Movimientos", Icons.AutoMirrored.Filled.ReceiptLong) {
                     scope.launch { drawerState.close() }
                     onNavigateToCuentas()
                 }
@@ -91,8 +96,8 @@ fun HomeScreen(
                 
                 Spacer(modifier = Modifier.weight(1f))
                 
-                Divider(color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
-                DrawerMenuItem("Cerrar Sesión", Icons.Default.Logout) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
+                DrawerMenuItem("Cerrar Sesión", Icons.AutoMirrored.Filled.Logout) {
                     scope.launch { drawerState.close() }
                     sessionManager.clearAuthToken()
                     onLogout()
@@ -155,7 +160,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        ShortcutItem("Nuevo Movimiento", Icons.Default.AddCircleOutline) { onNavigateToCuentas() }
+                        ShortcutItem("Movimiento", Icons.Default.AddCircleOutline) { onNavigateToCuentas() }
                         ShortcutItem("Presupuesto", Icons.Default.PieChart) { onNavigateToCategorias() }
                         ShortcutItem("Mi Perfil", Icons.Default.AccountCircle) { onNavigateToClientePerfil() }
                         ShortcutItem("Asesor", Icons.Default.QuestionAnswer) { onNavigateToAsesorAcciones() }
@@ -184,7 +189,22 @@ fun DrawerHeader(perfil: ClienteEntity?) {
                 .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(48.dp))
+            val fotoUrl = perfil?.fotoPerfil
+            if (fotoUrl != null) {
+                AsyncImage(
+                    model = fotoUrl,
+                    contentDescription = "Foto de perfil",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    Icons.Default.AccountCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -225,24 +245,24 @@ fun BalanceCard(balance: Double, ingresos: Double, gastos: Double) {
             Text("BALANCE DISPONIBLE", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "$ ${String.format("%.2f", balance)}", 
+                text = "$ ${String.format(Locale.US, "%.2f", balance)}", 
                 color = if (balance >= 0) MaterialTheme.colorScheme.primary else Color(0xFFC62828), 
                 fontSize = 32.sp, 
                 fontWeight = FontWeight.ExtraBold
             )
             
             Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = MaterialTheme.colorScheme.outlineVariant)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(16.dp))
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text("Ingresos", fontSize = 12.sp, color = Color.Gray)
-                    Text("$ ${String.format("%.2f", ingresos)}", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                    Text("$ ${String.format(Locale.US, "%.2f", ingresos)}", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("Gastos", fontSize = 12.sp, color = Color.Gray)
-                    Text("$ ${String.format("%.2f", gastos)}", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
+                    Text("$ ${String.format(Locale.US, "%.2f", gastos)}", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
                 }
             }
         }

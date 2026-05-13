@@ -13,7 +13,8 @@ data class ClienteEntity(
     val telefono: String,
     val rfc: String, // Usado como Universidad en el contexto estudiantil
     val password: String = "12345", // Password por defecto para simplificar
-    val saldo: Double = 0.0
+    val saldo: Double = 0.0,
+    val fotoPerfil: String? = null
 )
 
 @Entity(tableName = "asesores")

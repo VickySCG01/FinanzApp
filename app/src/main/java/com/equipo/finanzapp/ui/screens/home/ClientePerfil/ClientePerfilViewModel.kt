@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class ClientePerfilViewModel(
     private val repository: MainRepository,
@@ -28,6 +29,15 @@ class ClientePerfilViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
+
+    fun actualizarFotoPerfil(uri: String) {
+        viewModelScope.launch {
+            val currentPerfil = perfil.value
+            if (currentPerfil != null) {
+                repository.updateCliente(currentPerfil.copy(fotoPerfil = uri))
+            }
+        }
+    }
 
     fun logout() {
         sessionManager.clearAuthToken()
